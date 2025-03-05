@@ -27,6 +27,28 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
+// Update
+router.put('/:hootId', verifyToken, async (req, res) => {
+  try {
+    const hoot = await Hoot.findById(req.params.hootId);
+
+    if (!hoot.author.equals(req.user._id)) {
+      return res.status(403).send('Not allowed!');
+    }
+
+    const updatedHoot = await Hoot.findByIdAndUpdate(
+      req.params.hootId,
+      req.body,
+      { new: true }
+    );
+
+    updatedHoot._doc.author = req.user;
+    res.status(200).json(updatedHoot);
+  } catch (err) {
+    res.status(500).json({ err: err.message });
+  }
+});
+
 // Show
 router.get('/:hootId', verifyToken, async (req, res) => {
   try {
